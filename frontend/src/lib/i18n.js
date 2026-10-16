@@ -4,6 +4,10 @@
 // subscription hook `useLang`.
 
 import { useSyncExternalStore } from 'react'
+import { LOCAL_ONLY } from './local-only.js'
+import localZhUI from '../locales/zh.js'
+import localZhInstructions from '../instr/zh.js'
+import localZhNames from '../exercise-names/zh.js'
 import {
   LANGS, INSTR_LANGS, EXERCISE_NAME_LANGS, DATE_LOCALES, DERIVED_LOCALES, RTL_LANGS,
   getLang, dateLocale, t, tn, instrFor, exerciseNameFor, exerciseNameSearchText, getVersion,
@@ -66,6 +70,13 @@ export async function setLang(l, showEn, enOnly) {
   lastEnOnly = only
   const base = baseLang(l)
   let dict = {}, instr = null, exerciseNames = null
+  // The personal Chinese PWA must still open in Chinese when a split locale chunk cannot
+  // be fetched after an update or on a weak connection. Bundle its main packs with the shell.
+  if (LOCAL_ONLY && base === 'zh') {
+    dict = localZhUI
+    instr = localZhInstructions
+    exerciseNames = localZhNames
+  } else {
   try { dict = base === 'en' ? {} : (await localePacks['../locales/' + base + '.js']()).default } catch (e) { dict = {} }
   try { instr = base === 'en' || !INSTR_LANGS.includes(base) ? null : (await instrPacks['../instr/' + base + '.js']()).default } catch (e) { instr = null }
   try {
@@ -73,6 +84,7 @@ export async function setLang(l, showEn, enOnly) {
       ? null
       : (await exerciseNamePacks['../exercise-names/' + base + '.js']()).default
   } catch (e) { exerciseNames = null }
+  }
   _setLangState(l, derivePack(l, dict), derivePack(l, instr), derivePack(l, exerciseNames), show, only)
   if (detailsLoaded) loadDetails()
   document.documentElement.lang = l
