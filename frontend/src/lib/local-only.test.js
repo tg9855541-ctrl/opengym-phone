@@ -10,6 +10,7 @@ it('hands the exact JSON backup to the native share sheet as a named file', asyn
   Object.defineProperty(navigator, 'share', { configurable: true, value: share })
   const json = '{"workouts":[],"theme":"light"}'
   await shareBackup(json, 'opengym-backup-test.json')
+  expect(Object.keys(share.mock.calls[0][0])).toEqual(['files'])
   const file = share.mock.calls[0][0].files[0]
   expect(file.name).toBe('opengym-backup-test.json')
   expect(file.type).toBe('application/json')

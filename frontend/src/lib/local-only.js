@@ -6,7 +6,8 @@ export async function shareBackup(json, filename) {
   const file = new File([json], filename, { type: 'application/json' })
   if (navigator.canShare?.({ files: [file] })) {
     // The user chooses Save to Files -> iCloud Drive. Resolving this does not attest to iCloud sync.
-    await navigator.share({ files: [file], title: 'openGym 备份' })
+    // iOS Save to Files writes a title as a second .txt item, so share only the file.
+    await navigator.share({ files: [file] })
     return
   }
   const href = URL.createObjectURL(file)
